@@ -33,7 +33,7 @@ abline(uncmod)
 plot(x = rm_dat$CHL, y = rm_dat$cordiff, main = "scatterplot")
 plot(x = rm_dat$CHL, y = rm_dat$uncdiff, main = "scatterplot")
 plot(x = rm_dat$WTEM, y = rm_dat$uncdiff, main = "scatterplot")
-plot(x = rm_dat$SALT, y = rm_dat$, main = "scatterplot")
+plot(x = rm_dat$SALT, y = rm_dat$cordiff,  main = "scatterplot")
 
 diffmod <- lm(formula = cordiff ~ WTEM, data = rm_dat)
 abline(diffmod)

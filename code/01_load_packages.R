@@ -6,4 +6,4 @@
 #dplyr: streamlining data manipulation using pipes and simple functions
 #tidyverse:
 #openxlsx: simple reading and editing of excel workbooks, especially helpful with multitple sheets
-pacman::p_load(here, tidyverse, dplyr, openxlsx, parameters)
+pacman::p_load(here, tidyverse, dplyr, openxlsx, parameters, COR)
