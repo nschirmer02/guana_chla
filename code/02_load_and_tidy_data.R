@@ -18,12 +18,11 @@ merged1 <- merged %>%
     DateAnalyzed = openxlsx::convertToDateTime(as.numeric(DateAnalyzed), origin = "1900-01-01")
   )
 
-
 ##Preparing data for regression
 merged_chl <- merged1 %>% 
   
   #Filtering data to only include CHL values
-  filter(ComponentShort %in% c("CHLa_C", "CHLa_UnC", "CHL")) %>% 
+  filter(ComponentShort %in% c("CHLa_C", "CHLa_UnC", "CHL", "WTEM", "SALT")) %>% 
   
   #Mutating Result column to convert values to numeric class
   mutate(Result = as.numeric(Result)) %>% 
@@ -38,11 +37,11 @@ merged_chl <- merged1 %>%
     ) %>% 
   
   #Merging the new columns into a single row paired with the right SampleDate and StationCode 
-  select(SampleDate, StationCode, CHLa_C, CHLa_UnC, CHL) %>% 
+  select(SampleDate, StationCode, CHLa_C, CHLa_UnC, CHL, WTEM, SALT) %>% 
 
   group_by(SampleDate, StationCode) %>% 
   
-  summarise(across(c("CHLa_C", "CHLa_UnC", "CHL"), ~ sum(., na.rm = T)))  
+  summarise(across(c("CHLa_C", "CHLa_UnC", "CHL", "SALT", "WTEM"), ~ sum(., na.rm = T)))  
 
 #Changing the MDL values so they are 1/2 the MDL  
 merged_chl1 <- filter(merged_chl, !CHL == 0, !CHLa_C == 0, !CHLa_UnC == 0)

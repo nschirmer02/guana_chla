@@ -3,24 +3,68 @@ chl_dat <- read.csv(here::here("data", "guana_chl.csv"))
 
 View(chl_dat)
 
-#Scatter plot of relationship between Uncorrected Extracted CHLa and In situ CHLa 
-plot(x = chl_dat$CHL, y = chl_dat$CHLa_UnC, main = "Scatterplot")
+##Messing with CHL data
 
-#Scatter plot of relationship between corrected extracted CHLa and in situ CHLa
-plot(x = chl_dat$CHL, y = chl_dat$CHLa_C, main = "Scatterplot")
+#Splitting into two data frames
 
-#normality tests
-qqnorm(chl_dat$CHL)
-qqline(chl_dat$CHL)
+#One including only MDL values
+MDL_dat <- chl_dat %>% 
+  filter(CHLa_C == 1.25 & CHLa_UnC == 1.25)
 
-qqnorm(chl_dat$CHLa_C)
-qqline(chl_dat$CHLa_C)
+arrange 
+#No MDL values
+rm_dat <- chl_dat %>% 
+  filter(!CHLa_C == 1.25 & !CHLa_UnC == 1.25)  %>% 
+  filter(!CHLa_C > 200 & !CHLa_UnC > 200)
 
-qqnorm(chl_dat$CHLa_UnC)
-qqline(chl_dat$CHLa_UnC)
-#Definitely not normal 
+#Linear Regression for corrected extracted CHLa and in situ
+plot(x = rm_dat$CHLa_C, y = rm_dat$CHL, main = "scatterplot")
+cormod <- lm(formula = rm_dat$CHL ~ rm_dat$CHLa_C)
+summary(cormod)
+abline(cormod)
 
-#Testing skewness
-parameters::skewness(chl_dat$CHLa_UnC)
+#Linear Regression for uncorrected extracted CHLa and in situ
+plot(x = rm_dat$CHLa_UnC, y = rm_dat$CHL, main = "scatterplot")
+uncmod <- lm(formula = rm_dat$CHL ~ rm_dat$CHLa_UnC)
+summary(uncmod)
+abline(uncmod)
+
+#variability between the values remains unaffected 
+plot(x = rm_dat$CHL, y = rm_dat$cordiff, main = "scatterplot")
+plot(x = rm_dat$CHL, y = rm_dat$uncdiff, main = "scatterplot")
+plot(x = rm_dat$WTEM, y = rm_dat$uncdiff, main = "scatterplot")
+plot(x = rm_dat$SALT, y = rm_dat$, main = "scatterplot")
+
+diffmod <- lm(formula = cordiff ~ WTEM, data = rm_dat)
+abline(diffmod)
+
+ggplot(rm_dat, aes(x = WTEM, y = cordiff, color = StationCode)) +
+  geom_point() + 
+  scale_color_brewer(type = "qua", palette = 3)
 
 
+#Calculate the percent differences for each value in the data set
+percent_diff <- function (x, y) {
+  diff = x - y
+  avg = (x + y)/2
+  pct_diff = (diff/avg)*100
+  return(pct_diff)
+}
+
+#Adding columns for percentage difference between the three CHL types
+pct_rm_dat <- rm_dat %>% 
+  mutate(
+    cordiff = percent_diff(CHLa_C, CHL), 
+    uncdiff = percent_diff(CHLa_UnC, CHL)
+  ) %>% 
+  group_by(StationCode) %>% 
+  summarise(
+    cordiff = mean(cordiff), 
+    uncdiff = mean(uncdiff)
+  )
+
+#Cor test time 
+cor_dat <- chl_dat[,4:8]
+m <- cor(cor_dat, method = "spearman")
+COR::corplot(m, method = circle)
+corrplot::corrplot(m, method = "circle", order = "FPC", type = "lower", diag = F)
